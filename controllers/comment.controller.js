@@ -4,34 +4,33 @@ import Comment from "../models/comment.model.js";
 // ✅ Create Comment
 export const createComment = async (req, res) => {
   try {
+    const { content, parentId } = req.body;
     const postId = req.params.id;
     const userId = req.id;
-    const { content } = req.body;
 
     if (!content) return res.status(400).json({ message: 'Text is required', success: false });
 
     const blog = await Blog.findById(postId);
-    if (!blog) return res.status(404).json({ success: false, message: "Blog not found" });
+    if (!blog) return res.status(404).json({ message: "Blog not found", success: false });
 
     const comment = await Comment.create({
       content,
       userId,
-      postId
+      postId,
+      parentId: parentId || null
     });
 
-    await comment.populate("userId", "firstName lastName photoUrl");
+    await comment.populate({ path: 'userId', select: 'firstName lastName photoUrl' });
 
     blog.comments.push(comment._id);
     await blog.save();
 
-    return res.status(201).json({
-      message: 'Comment added successfully',
-      comment,
-      success: true
-    });
+    req.io.emit("newComment", comment); // <-- Real-time emit
+
+    return res.status(201).json({ message: 'Comment added', comment, success: true });
   } catch (error) {
-    console.error("Error creating comment:", error);
-    return res.status(500).json({ success: false, message: "Failed to create comment" });
+    console.error(error);
+    res.status(500).json({ message: "Failed to create comment", error: error.message });
   }
 };
 
