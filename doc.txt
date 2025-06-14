@@ -1,8 +1,0 @@
-FRONTEND_URL="http://localhost:5173"
-PORT=9123
-MONGO_URI= "mongodb+srv://quorvexinstitute:qspace@cluster0.ceefgw0.mongodb.net/quorvexinstitute?retryWrites=true&w=majority&appName=Cluster0"
-SECRET_KEY="ljlkjsdfjdslkfjdslkfjsd"
-NODE_ENV="development"
-CLOUDINARY_APP_NAME="dyrcczazy"
-CLOUDINARY_API_KEY="671222636147561"
-CLOUDINARY_API_SECRET="LAsleCX1MCWhEE1k3oJGilPAi0I"
