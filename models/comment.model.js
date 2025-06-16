@@ -1,3 +1,4 @@
+
 import mongoose from 'mongoose';
 
 const commentSchema = new mongoose.Schema(
@@ -34,6 +35,16 @@ const commentSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
+    dislikes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      }
+    ],
+    numberOfDislikes: {
+      type: Number,
+      default: 0
+    },
     isEdited: {
       type: Boolean,
       default: false
@@ -42,12 +53,16 @@ const commentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Optional: Auto-update `numberOfLikes` on like/unlike
+// Optional: Auto-update like/dislike counters if needed
 commentSchema.methods.updateLikesCount = function () {
   this.numberOfLikes = this.likes.length;
   return this.save();
 };
 
+commentSchema.methods.updateDislikesCount = function () {
+  this.numberOfDislikes = this.dislikes.length;
+  return this.save();
+};
+
 const Comment = mongoose.model('Comment', commentSchema);
 export default Comment;
-
