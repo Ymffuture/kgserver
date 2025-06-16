@@ -2,7 +2,7 @@ import express from "express"
 
 import { isAuthenticated } from "../middleware/isAuthenticated.js"
 import { singleUpload } from "../middleware/multer.js"
-import {createBlog, deleteBlog, dislikeBlog, getAllBlogs, getMyTotalBlogLikes, getOwnBlogs, getPublishedBlog, likeBlog, togglePublishBlog, updateBlog } from "../controllers/blog.controller.js"
+import {createBlog, deleteBlog, dislikeBlog, getAllBlogs, getMyTotalBlogLikes, getOwnBlogs, getPublishedBlog, likeBlog, togglePublishBlog, updateBlog, getMyTotalBlogDislikes} from "../controllers/blog.controller.js"
 
 const router = express.Router()
 
