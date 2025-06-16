@@ -1,8 +1,7 @@
 import express from "express"
-import { getAllUsers, login, logout, register, updateProfile } from "../controllers/user.controller.js"
+import { getAllUsers, login, logout, register, updateProfile, googleLogin } from "../controllers/user.controller.js"
 import { isAuthenticated } from "../middleware/isAuthenticated.js"
 import { singleUpload } from "../middleware/multer.js"
-import {googleLogin} from "../controllers/auth.js" 
 const router = express.Router()
 
 router.route("/register").post(register)
