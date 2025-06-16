@@ -3,6 +3,9 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import getDataUri from "../utils/dataUri.js";
 import cloudinary from "../utils/cloudinary.js";
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const register = async (req, res) => {
   try {
@@ -102,12 +105,11 @@ export const login = async (req, res) => {
 
     return res.status(200)
       .cookie("token", token, {
-  maxAge: 24 * 60 * 60 * 1000,
-  httpOnly: true,
-  sameSite: "None",  // for cross-site cookie sharing
-  secure: true       // only over HTTPS
-})
-
+        maxAge: 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: "None",
+        secure: true
+      })
       .json({
         success: true,
         message: `Welcome back ${user.firstName}`,
@@ -118,6 +120,54 @@ export const login = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to Login"
+    });
+  }
+};
+
+export const googleLogin = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+    const { email, given_name, family_name, picture } = payload;
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({
+        email,
+        firstName: given_name,
+        lastName: family_name,
+        userName: email.split('@')[0],
+        password: await bcrypt.hash(Math.random().toString(36), 10),
+        photoUrl: picture
+      });
+    }
+
+    const jwtToken = jwt.sign({ userId: user._id }, process.env.SECRET_KEY || "dev-secret", {
+      expiresIn: '1d'
+    });
+
+    return res.status(200)
+      .cookie("token", jwtToken, {
+        maxAge: 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: "None",
+        secure: true
+      })
+      .json({
+        success: true,
+        message: `Welcome ${user.firstName}`,
+        user
+      });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({
+      success: false,
+      message: "Google login failed"
     });
   }
 };
