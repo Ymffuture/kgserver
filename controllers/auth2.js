@@ -7,7 +7,7 @@ const router = express.Router();
 
 const CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
-const FRONTEND_URL = process.env.FRONTEND_URL;
+const FRONTEND_URL = "https://qspaceblog.vercel.app" || process.env.FRONTEND_URL;
 
 // Step 1: Redirect to GitHub login
 router.get("/github", (req, res) => {
