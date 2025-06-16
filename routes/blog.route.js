@@ -16,7 +16,7 @@ router.route("/delete/:id").delete(isAuthenticated, deleteBlog);
 router.get("/:id/like", isAuthenticated, likeBlog);
 router.get("/:id/dislike", isAuthenticated, dislikeBlog);
 router.get('/my-blogs/likes', isAuthenticated, getMyTotalBlogLikes)
-router.get('/me/dislikes', authenticateUser, getMyTotalBlogDislikes);
+router.get('/me/dislikes', isAuthenticated, getMyTotalBlogDislikes);
 
 
 export default router;
