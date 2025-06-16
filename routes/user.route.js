@@ -9,6 +9,6 @@ router.route("/login").post(login)
 router.route("/logout").get(logout)
 router.route("/profile/update").put(isAuthenticated, singleUpload, updateProfile)
 router.get('/all-users', getAllUsers);
-router.route('/auth/google-login').post(googleLogin);
-
+// router.route('/auth/google-login').post(googleLogin);
+router.post("/v2/auth/google-login", googleLogin);
 export default router;
