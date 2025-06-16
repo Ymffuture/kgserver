@@ -292,3 +292,26 @@ export const getMyTotalBlogLikes = async (req, res) => {
       });
     }
   };
+export const getMyTotalBlogDislikes = async (req, res) => {
+  try {
+    const userId = req.id;
+
+    // Step 1: Find blogs authored by the current user
+    const myBlogs = await Blog.find({ author: userId }).select("dislikes");
+
+    // Step 2: Sum total dislikes from all blogs
+    const totalDislikes = myBlogs.reduce((acc, blog) => acc + (blog.dislikes?.length || 0), 0);
+
+    res.status(200).json({
+      success: true,
+      totalBlogs: myBlogs.length,
+      totalDislikes,
+    });
+  } catch (error) {
+    console.error("Error getting total blog dislikes:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch total blog dislikes",
+    });
+  }
+};
