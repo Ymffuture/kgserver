@@ -25,7 +25,7 @@ export const createComment = async (req, res) => {
     blog.comments.push(comment._id);
     await blog.save();
 
-    req.io.emit("newComment", comment); // <-- Real-time emit
+    req.io.emit("newComment", comment);
 
     return res.status(201).json({ message: 'Comment added', comment, success: true });
   } catch (error) {
@@ -117,6 +117,13 @@ export const likeComment = async (req, res) => {
     } else {
       comment.likes.push(userId);
       comment.numberOfLikes += 1;
+
+      // Remove dislike if it exists
+      const wasDisliked = comment.dislikes.includes(userId);
+      if (wasDisliked) {
+        comment.dislikes = comment.dislikes.filter(id => id.toString() !== userId);
+        comment.numberOfDislikes -= 1;
+      }
     }
 
     await comment.save();
@@ -129,6 +136,45 @@ export const likeComment = async (req, res) => {
   } catch (error) {
     console.error("Error liking comment:", error);
     return res.status(500).json({ success: false, message: "Failed to like comment" });
+  }
+};
+
+// ✅ Dislike / Undislike Comment
+export const dislikeComment = async (req, res) => {
+  try {
+    const userId = req.id;
+    const commentId = req.params.id;
+
+    const comment = await Comment.findById(commentId).populate("userId", "firstName lastName");
+    if (!comment) return res.status(404).json({ success: false, message: "Comment not found" });
+
+    const alreadyDisliked = comment.dislikes.includes(userId);
+
+    if (alreadyDisliked) {
+      comment.dislikes = comment.dislikes.filter(id => id.toString() !== userId);
+      comment.numberOfDislikes -= 1;
+    } else {
+      comment.dislikes.push(userId);
+      comment.numberOfDislikes += 1;
+
+      // Remove like if it exists
+      const wasLiked = comment.likes.includes(userId);
+      if (wasLiked) {
+        comment.likes = comment.likes.filter(id => id.toString() !== userId);
+        comment.numberOfLikes -= 1;
+      }
+    }
+
+    await comment.save();
+
+    return res.status(200).json({
+      success: true,
+      message: alreadyDisliked ? "Comment undisliked" : "Comment disliked",
+      updatedComment: comment
+    });
+  } catch (error) {
+    console.error("Error disliking comment:", error);
+    return res.status(500).json({ success: false, message: "Failed to dislike comment" });
   }
 };
 
