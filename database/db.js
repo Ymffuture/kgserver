@@ -1,17 +1,16 @@
 import mongoose from "mongoose";
 
-const connectDB = async()=>{
-    try {
-        await mongoose.connect(process.env.MONGO_URI, 
-                               {dbName:quorvexinstitute} 
-                              ) 
-            
-        console.log("MongoDB connected successfully");
-        
-    } catch (error) {
-        console.log("MongoDB connection error", error);
-        
-    }
-}
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      dbName: "quorvexinstitute", // ✅ Use string here
+    });
+
+    console.log("✅ MongoDB connected successfully to 'quorvexinstitute'");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error);
+  }
+};
 
 export default connectDB;
+
