@@ -3,54 +3,17 @@ import mongoose from 'mongoose';
 
 const commentSchema = new mongoose.Schema(
   {
-    content: {
-      type: String,
-      required: [true, 'Comment content is required'],
-      trim: true,
-      minlength: 1,
-      maxlength: 1000
-    },
-    postId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Blog',
-      required: true
-    },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    parentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Comment', // Support for nested replies
-      default: null
-    },
-    likes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      }
-    ],
-    numberOfLikes: {
-      type: Number,
-      default: 0
-    },
-    dislikes: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      }
-    ],
-    numberOfDislikes: {
-      type: Number,
-      default: 0
-    },
-    isEdited: {
-      type: Boolean,
-      default: false
-    }
-  },
-  { timestamps: true }
+  content: { type: String, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Blog' },
+  parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment', default: null },
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  numberOfLikes: { type: Number, default: 0 },
+  numberOfDislikes: { type: Number, default: 0 },
+  editedAt: { type: Date },
+}, { timestamps: true });
+
 );
 
 // Optional: Auto-update like/dislike counters if needed
