@@ -1,34 +1,61 @@
+import mongoose from "mongoose";
 
-import mongoose from 'mongoose';
+const { Schema, model, Types } = mongoose;
 
-const commentSchema = new mongoose.Schema(
+const commentSchema = new Schema(
   {
-  content: { type: String, required: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  postId: { type: mongoose.Schema.Types.ObjectId, ref: 'Blog' },
-  parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment', default: null },
-  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  numberOfLikes: { type: Number, default: 0 },
-  numberOfDislikes: { type: Number, default: 0 },
-  editedAt: { type: Date },
-}, { timestamps: true });
-
+    content: {
+      type: String,
+      required: [true, "Comment content is required"],
+      trim: true,
+    },
+    userId: {
+      type: Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    postId: {
+      type: Types.ObjectId,
+      ref: "Blog",
+      required: true,
+    },
+    parentId: {
+      type: Types.ObjectId,
+      ref: "Comment",
+      default: null,
+    },
+    likes: [
+      {
+        type: Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    dislikes: [
+      {
+        type: Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    numberOfLikes: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    numberOfDislikes: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    editedAt: {
+      type: Date,
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+  }
 );
 
-comment.numberOfLikes = comment.likes.length;
-comment.numberOfDislikes = comment.dislikes.length;
+export default model("Comment", commentSchema);
 
-// Optional: Auto-update like/dislike counters if needed
-commentSchema.methods.updateLikesCount = function () {
-  this.numberOfLikes = this.likes.length;
-  return this.save();
-};
-
-commentSchema.methods.updateDislikesCount = function () {
-  this.numberOfDislikes = this.dislikes.length;
-  return this.save();
-};
-
-const Comment = mongoose.model('Comment', commentSchema);
-export default Comment;
