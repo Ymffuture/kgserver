@@ -27,7 +27,7 @@ export const createComment = async (req, res) => {
 
     req.io.emit("newComment", comment);
 
-    return res.status(201).json({ message: 'Comment added', comment, success: true });
+    return res.status(201).json({ message: 'Comment added successfully', comment, success: true });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to create comment", error: error.message });
@@ -42,10 +42,7 @@ export const getCommentsOfPost = async (req, res) => {
       .populate("userId", "firstName lastName photoUrl")
       .sort({ createdAt: -1 });
 
-    return res.status(200).json({
-      success: true,
-      comments
-    });
+    return res.status(200).json({ success: true, comments });
   } catch (error) {
     console.error("Error getting blog comments:", error);
     return res.status(500).json({ success: false, message: "Failed to get comments" });
@@ -93,6 +90,8 @@ export const editComment = async (req, res) => {
     comment.editedAt = new Date();
     await comment.save();
 
+    req.io.emit("updateComment", comment);
+
     return res.status(200).json({ success: true, message: 'Comment updated successfully', comment });
   } catch (error) {
     console.error("Error editing comment:", error);
@@ -113,20 +112,17 @@ export const likeComment = async (req, res) => {
 
     if (alreadyLiked) {
       comment.likes = comment.likes.filter(id => id.toString() !== userId);
-      comment.numberOfLikes -= 1;
     } else {
       comment.likes.push(userId);
-      comment.numberOfLikes += 1;
-
-      // Remove dislike if it exists
-      const wasDisliked = comment.dislikes.includes(userId);
-      if (wasDisliked) {
-        comment.dislikes = comment.dislikes.filter(id => id.toString() !== userId);
-        comment.numberOfDislikes -= 1;
-      }
+      // Remove dislike
+      comment.dislikes = comment.dislikes.filter(id => id.toString() !== userId);
     }
 
+    comment.numberOfLikes = comment.likes.length;
+    comment.numberOfDislikes = comment.dislikes.length;
+
     await comment.save();
+    req.io.emit("updateComment", comment);
 
     return res.status(200).json({
       success: true,
@@ -152,20 +148,17 @@ export const dislikeComment = async (req, res) => {
 
     if (alreadyDisliked) {
       comment.dislikes = comment.dislikes.filter(id => id.toString() !== userId);
-      comment.numberOfDislikes -= 1;
     } else {
       comment.dislikes.push(userId);
-      comment.numberOfDislikes += 1;
-
-      // Remove like if it exists
-      const wasLiked = comment.likes.includes(userId);
-      if (wasLiked) {
-        comment.likes = comment.likes.filter(id => id.toString() !== userId);
-        comment.numberOfLikes -= 1;
-      }
+      // Remove like
+      comment.likes = comment.likes.filter(id => id.toString() !== userId);
     }
 
+    comment.numberOfLikes = comment.likes.length;
+    comment.numberOfDislikes = comment.dislikes.length;
+
     await comment.save();
+    req.io.emit("updateComment", comment);
 
     return res.status(200).json({
       success: true,
@@ -182,7 +175,6 @@ export const dislikeComment = async (req, res) => {
 export const getAllCommentsOnMyBlogs = async (req, res) => {
   try {
     const userId = req.id;
-
     const myBlogs = await Blog.find({ author: userId }).select("_id");
 
     if (myBlogs.length === 0) {
