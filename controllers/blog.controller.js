@@ -4,33 +4,45 @@ import cloudinary from "../utils/cloudinary.js";
 import getDataUri from "../utils/dataUri.js";
 
 // Create a new blog post
-export const createBlog = async (req,res) => {
-    try {
-        const {title, category} = req.body;
-        if(!title || !category) {
-            return res.status(400).json({
-                message:"Blog title and category is required."
-            })
-        }
+ export const createBlog = async (req, res) => {
+  try {
+    const { title, category } = req.body;
 
-        const blog = await Blog.create({
-            title,
-            category,
-            author:req.id
-        })
-
-        return res.status(201).json({
-            success:true,
-            blog,
-            message:"Blog Created Successfully."
-        })
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message:"Failed to create blog"
-        })
+    if (!title || !category) {
+      return res.status(400).json({
+        message: "Blog title and category are required.",
+      });
     }
-}
+
+    const authorId = req.id || req.user?.id; // fallback
+
+    if (!authorId) {
+      return res.status(401).json({
+        message: "Unauthorized: Author not found",
+      });
+    }
+
+    const blog = await Blog.create({
+      title,
+      category,
+      author: authorId,
+    });
+
+    return res.status(201).json({
+      success: true,
+      blog,
+      message: "Blog Created Successfully.",
+    });
+  } catch (error) {
+    console.log("Create Blog Error:", error);
+    return res.status(500).json({
+      message: "Failed to create blog",
+      error: error.message,
+    });
+  }
+};
+
+
 
 export const updateBlog = async (req, res) => {
     try {
