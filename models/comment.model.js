@@ -1,61 +1,25 @@
 import mongoose from "mongoose";
 
-const { Schema, model, Types } = mongoose;
-
-const commentSchema = new Schema(
+const commentSchema = new mongoose.Schema(
   {
-    content: {
-      type: String,
-      required: [true, "Comment content is required"],
-      trim: true,
+    content: { type: String, required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    postId: { type: mongoose.Schema.Types.ObjectId, ref: "Blog", required: true },
+    parentId: { type: mongoose.Schema.Types.ObjectId, ref: "Comment", default: null },
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    dislikes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    reactions: {
+      type: Map,
+      of: [mongoose.Schema.Types.ObjectId], // e.g., { 😂: [user1, user2] }
+      default: {}
     },
-    userId: {
-      type: Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    postId: {
-      type: Types.ObjectId,
-      ref: "Blog",
-      required: true,
-    },
-    parentId: {
-      type: Types.ObjectId,
-      ref: "Comment",
-      default: null,
-    },
-    likes: [
-      {
-        type: Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    dislikes: [
-      {
-        type: Types.ObjectId,
-        ref: "User",
-      },
-    ],
-    numberOfLikes: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-    numberOfDislikes: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-    editedAt: {
-      type: Date,
-      default: null,
-    },
+    numberOfLikes: { type: Number, default: 0 },
+    numberOfDislikes: { type: Number, default: 0 },
+    editedAt: { type: Date }
   },
-  {
-    timestamps: true,
-    versionKey: false,
-  }
+  { timestamps: true }
 );
 
-export default model("Comment", commentSchema);
+const Comment = mongoose.model("Comment", commentSchema);
+export default Comment;
 
