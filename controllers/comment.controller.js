@@ -203,3 +203,28 @@ export const getAllCommentsOnMyBlogs = async (req, res) => {
   }
 };
 
+export const reactToComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { emoji } = req.body;
+    const userId = req.user._id;
+
+    const comment = await Comment.findById(id);
+    if (!comment) return res.status(404).json({ success: false, message: "Comment not found" });
+
+    const currentReactors = comment.reactions.get(emoji) || [];
+    const alreadyReacted = currentReactors.includes(userId.toString());
+
+    if (alreadyReacted) {
+      comment.reactions.set(emoji, currentReactors.filter(uid => uid !== userId.toString()));
+    } else {
+      comment.reactions.set(emoji, [...currentReactors, userId.toString()]);
+    }
+
+    await comment.save();
+    res.status(200).json({ success: true, updatedComment: comment });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
