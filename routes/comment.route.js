@@ -8,6 +8,7 @@ import {
   getAllCommentsOnMyBlogs,
   getCommentsOfPost,
   likeComment,
+  reactToComment, 
   dislikeComment // ✅ NEW controller
 } from "../controllers/comment.controller.js";
 
@@ -25,6 +26,6 @@ router.get('/my-blogs/comments', isAuthenticated, getAllCommentsOnMyBlogs);
 // Like / Dislike
 router.get('/:id/like', isAuthenticated, likeComment);
 router.get('/:id/dislike', isAuthenticated, dislikeComment); // ✅ NEW route
-
+router.get('/:id/react', isAuthenticated, reactToComment) ;
 export default router;
 
