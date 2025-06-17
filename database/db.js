@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI, {
-      dbName: "quorvexinstitute", // ✅ Use string here
+      dbName: "quorvex", // ✅ Use string here
     });
 
     console.log("✅ MongoDB connected successfully to 'quorvexinstitute'");
