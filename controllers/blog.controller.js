@@ -208,6 +208,12 @@ export const likeBlog = async (req, res) => {
 
     blog.likes.push(userId);
     await blog.save();
+const io = req.app.get("io");
+io.emit("reactionUpdate", {
+  blogId: blog._id,
+  likes: blog.likes,
+  dislikes: blog.dislikes,
+});
 
     return res.status(200).json({ success: true, message: 'Blog liked', blog });
   } catch (error) {
