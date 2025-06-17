@@ -16,6 +16,9 @@ const commentSchema = new mongoose.Schema(
 
 );
 
+comment.numberOfLikes = comment.likes.length;
+comment.numberOfDislikes = comment.dislikes.length;
+
 // Optional: Auto-update like/dislike counters if needed
 commentSchema.methods.updateLikesCount = function () {
   this.numberOfLikes = this.likes.length;
