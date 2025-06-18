@@ -185,7 +185,7 @@ export const logout = async (_, res) => {
   }
 };
 
-export const updateProfile = async (req, res) => {
+export const updateProfile = async (req, rest, Next) => {
   try {
     const userId = req.id;
     const {
@@ -233,6 +233,7 @@ export const updateProfile = async (req, res) => {
       message: "Failed to update profile"
     });
   }
+  Next() 
 };
 
 export const getAllUsers = async (req, res) => {
