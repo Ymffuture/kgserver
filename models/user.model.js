@@ -12,6 +12,11 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    userName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     email: {
       type: String,
       required: true,
@@ -27,7 +32,7 @@ const userSchema = new mongoose.Schema(
     },
     googleId: {
       type: String,
-      default: null, // For Google-authenticated users
+      default: "" , // For Google-authenticated users
       index: true,
     },
     photoUrl: {
@@ -37,7 +42,7 @@ const userSchema = new mongoose.Schema(
     bio: {
       type: String,
       default: "",
-      maxlength: 500,
+      maxlength: 1000,
     },
     occupation: {
       type: String,
