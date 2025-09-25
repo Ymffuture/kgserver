@@ -4,7 +4,6 @@ import cloudinary from "../utils/cloudinary.js";
 import getDataUri from "../utils/dataUri.js";
 
 // Create a new blog post
- 
 export const createBlog = async (req,res) => {
     try {
         const {title, category} = req.body;
@@ -32,7 +31,6 @@ export const createBlog = async (req,res) => {
         })
     }
 }
-
 
 export const updateBlog = async (req, res) => {
     try {
@@ -210,12 +208,6 @@ export const likeBlog = async (req, res) => {
 
     blog.likes.push(userId);
     await blog.save();
-const io = req.app.get("io");
-io.emit("reactionUpdate", {
-  blogId: blog._id,
-  likes: blog.likes,
-  dislikes: blog.dislikes,
-});
 
     return res.status(200).json({ success: true, message: 'Blog liked', blog });
   } catch (error) {
@@ -300,26 +292,3 @@ export const getMyTotalBlogLikes = async (req, res) => {
       });
     }
   };
-export const getMyTotalBlogDislikes = async (req, res) => {
-  try {
-    const userId = req.id;
-
-    // Step 1: Find blogs authored by the current user
-    const myBlogs = await Blog.find({ author: userId }).select("dislikes");
-
-    // Step 2: Sum total dislikes from all blogs
-    const totalDislikes = myBlogs.reduce((acc, blog) => acc + (blog.dislikes?.length || 0), 0);
-
-    res.status(200).json({
-      success: true,
-      totalBlogs: myBlogs.length,
-      totalDislikes,
-    });
-  } catch (error) {
-    console.error("Error getting total blog dislikes:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch total blog dislikes",
-    });
-  }
-};
