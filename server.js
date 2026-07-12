@@ -15,13 +15,23 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Render (and most PaaS) terminate TLS at a proxy and forward plain HTTP internally.
+// Without this, req.secure is always false, breaking secure-cookie detection below.
+app.set("trust proxy", 1);
+
 // Fix for __dirname in ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // CORS
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  "https://quorvexinstitute.vercel.app",
+  "http://localhost:5173",
+].filter(Boolean);
+
 const corsOptions = {
-  origin: [process.env.FRONTEND_URL, "http://localhost:5173"],
+  origin: allowedOrigins,
   credentials: true,
 };
 app.use(cors(corsOptions));
