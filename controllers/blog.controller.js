@@ -107,6 +107,35 @@ export const getPublishedBlog = async (_,res) => {
     }
 }
 
+// Get a single blog by id — used by the blog view page (e.g. on direct
+// navigation / page refresh, when the blog isn't already in Redux state)
+export const getBlogById = async (req, res) => {
+    try {
+        const { blogId } = req.params;
+
+        const blog = await Blog.findById(blogId)
+            .populate({ path: "author", select: "firstName lastName photoUrl" })
+            .populate({
+                path: "comments",
+                options: { sort: { createdAt: -1 } },
+                populate: {
+                    path: "userId",
+                    select: "firstName lastName photoUrl"
+                }
+            });
+
+        if (!blog) {
+            return res.status(404).json({ success: false, message: "Blog not found" });
+        }
+
+        return res.status(200).json({ success: true, blog });
+    } catch (error) {
+        console.log(error);
+        // Invalid ObjectId format also lands here — treat as not found rather than 500
+        return res.status(404).json({ success: false, message: "Blog not found" });
+    }
+};
+
 export const togglePublishBlog = async (req,res) => {
     try {
         const {blogId} = req.params;
