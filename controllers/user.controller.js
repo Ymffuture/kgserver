@@ -103,14 +103,18 @@ export const login = async (req, res) => {
       expiresIn: '1d'
     });
 
-    const isProd = process.env.NODE_ENV === "production";
+    // Detect HTTPS from the real request (works behind Render's proxy thanks to
+    // app.set("trust proxy", 1) in server.js). Cross-site cookies MUST be
+    // sameSite: "None" + secure: true when served over HTTPS; falling back to
+    // Lax/non-secure only makes sense for genuine local http:// testing.
+    const isHttps = req.secure || req.headers["x-forwarded-proto"] === "https";
 
     return res.status(200)
       .cookie("token", token, {
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: isProd ? "None" : "Lax",
-        secure: isProd
+        sameSite: isHttps ? "None" : "Lax",
+        secure: isHttps
       })
       .json({
         success: true,
@@ -153,14 +157,14 @@ export const googleLogin = async (req, res) => {
       expiresIn: '1d'
     });
 
-    const isProd = process.env.NODE_ENV === "production";
+    const isHttps = req.secure || req.headers["x-forwarded-proto"] === "https";
 
     return res.status(200)
       .cookie("token", jwtToken, {
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: isProd ? "None" : "Lax",
-        secure: isProd
+        sameSite: isHttps ? "None" : "Lax",
+        secure: isHttps
       })
       .json({
         success: true,
