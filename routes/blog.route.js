@@ -2,7 +2,7 @@ import express from "express"
 
 import { isAuthenticated } from "../middleware/isAuthenticated.js"
 import { singleUpload } from "../middleware/multer.js"
-import {createBlog, deleteBlog, dislikeBlog, getAllBlogs, getBlogById, getMyTotalBlogLikes, getOwnBlogs, getPublishedBlog, likeBlog, togglePublishBlog, updateBlog, getMyTotalBlogDislikes} from "../controllers/blog.controller.js"
+import {createBlog, deleteBlog, dislikeBlog, undislikeBlog, unlikeBlog, getAllBlogs, getBlogById, getMyTotalBlogLikes, getOwnBlogs, getPublishedBlog, likeBlog, togglePublishBlog, updateBlog, getMyTotalBlogDislikes} from "../controllers/blog.controller.js"
 
 const router = express.Router()
 
@@ -21,6 +21,10 @@ router.route("/delete/:id").delete(isAuthenticated, deleteBlog);
 // these were previously GET, which silently failed as a method mismatch.
 router.post("/:id/like", isAuthenticated, likeBlog);
 router.post("/:id/dislike", isAuthenticated, dislikeBlog);
+// Toggle-off actions — frontend calls these when un-liking/un-disliking,
+// but they had no matching route before.
+router.post("/:id/unlike", isAuthenticated, unlikeBlog);
+router.post("/:id/undislike", isAuthenticated, undislikeBlog);
 
 router.get('/my-blogs/likes', isAuthenticated, getMyTotalBlogLikes)
 router.get('/me/dislikes', isAuthenticated, getMyTotalBlogDislikes);
