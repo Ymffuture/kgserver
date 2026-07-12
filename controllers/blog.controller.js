@@ -238,13 +238,16 @@ export const likeBlog = async (req, res) => {
     }
 
     blog.likes.push(userId);
+    blog.dislikes = blog.dislikes.filter(id => id.toString() !== userId);
     await blog.save();
 const io = req.app.get("io");
-io.emit("reactionUpdate", {
-  blogId: blog._id,
-  likes: blog.likes,
-  dislikes: blog.dislikes,
-});
+if (io) {
+  io.emit("reactionUpdate", {
+    blogId: blog._id,
+    likes: blog.likes,
+    dislikes: blog.dislikes,
+  });
+}
 
     return res.status(200).json({ success: true, message: 'Blog liked', blog });
   } catch (error) {
@@ -263,18 +266,75 @@ export const dislikeBlog = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Blog not found' });
     }
 
-    const wasLiked = blog.likes.includes(userId);
-    if (!wasLiked) {
-      return res.status(400).json({ success: false, message: 'You have not liked this blog' });
+    const alreadyDisliked = blog.dislikes.includes(userId);
+    if (alreadyDisliked) {
+      return res.status(400).json({ success: false, message: 'You already disliked this blog' });
     }
 
+    // A blog shouldn't be both liked and disliked by the same user at once
     blog.likes = blog.likes.filter(id => id.toString() !== userId);
+    blog.dislikes.push(userId);
     await blog.save();
+
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("reactionUpdate", { blogId: blog._id, likes: blog.likes, dislikes: blog.dislikes });
+    }
 
     return res.status(200).json({ success: true, message: 'Blog disliked', blog });
   } catch (error) {
     console.error("Error disliking blog:", error);
     return res.status(500).json({ success: false, message: 'Failed to dislike blog' });
+  }
+};
+
+export const unlikeBlog = async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const userId = req.id;
+
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({ success: false, message: 'Blog not found' });
+    }
+
+    blog.likes = blog.likes.filter(id => id.toString() !== userId);
+    await blog.save();
+
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("reactionUpdate", { blogId: blog._id, likes: blog.likes, dislikes: blog.dislikes });
+    }
+
+    return res.status(200).json({ success: true, message: 'Like removed', blog });
+  } catch (error) {
+    console.error("Error unliking blog:", error);
+    return res.status(500).json({ success: false, message: 'Failed to unlike blog' });
+  }
+};
+
+export const undislikeBlog = async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const userId = req.id;
+
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({ success: false, message: 'Blog not found' });
+    }
+
+    blog.dislikes = blog.dislikes.filter(id => id.toString() !== userId);
+    await blog.save();
+
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("reactionUpdate", { blogId: blog._id, likes: blog.likes, dislikes: blog.dislikes });
+    }
+
+    return res.status(200).json({ success: true, message: 'Dislike removed', blog });
+  } catch (error) {
+    console.error("Error undisliking blog:", error);
+    return res.status(500).json({ success: false, message: 'Failed to undislike blog' });
   }
 };
 
