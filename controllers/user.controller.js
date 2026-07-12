@@ -103,12 +103,14 @@ export const login = async (req, res) => {
       expiresIn: '1d'
     });
 
+    const isProd = process.env.NODE_ENV === "production";
+
     return res.status(200)
       .cookie("token", token, {
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: "None",
-        secure: true
+        sameSite: isProd ? "None" : "Lax",
+        secure: isProd
       })
       .json({
         success: true,
@@ -151,12 +153,14 @@ export const googleLogin = async (req, res) => {
       expiresIn: '1d'
     });
 
+    const isProd = process.env.NODE_ENV === "production";
+
     return res.status(200)
       .cookie("token", jwtToken, {
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: "None",
-        secure: true
+        sameSite: isProd ? "None" : "Lax",
+        secure: isProd
       })
       .json({
         success: true,
