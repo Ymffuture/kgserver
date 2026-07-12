@@ -26,7 +26,7 @@ const __dirname = path.dirname(__filename);
 // CORS
 const allowedOrigins = [
   process.env.FRONTEND_URL,
-  "https://quorvexinstitute.vercel.app",
+  "https://qspaceblog.vercel.app",
   "http://localhost:5173",
 ].filter(Boolean);
 
@@ -87,4 +87,3 @@ connectDB().then(() => {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
   });
 });
-
