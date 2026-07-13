@@ -46,10 +46,12 @@ app.use("/api/v1/user", userRoute);
 app.use("/api/v1/blog", blogRoute);
 app.use("/api/v1/comment", commentRoute);
 
-// Serve frontend (production)
-app.use(express.static(path.join(__dirname, "/frontend/dist")));
-app.get("*", (_, res) => {
-  res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
+// This is an API-only backend — the frontend (kgclient) is deployed
+// separately on Vercel. A simple root route so health checks / browser
+// visits get a clean 200 instead of an ENOENT trying to serve a
+// frontend/dist folder that doesn't exist in this repo.
+app.get("/", (_, res) => {
+  res.status(200).json({ status: "ok", message: "kgserver API is running" });
 });
 
 // Create HTTP server & socket.io server
