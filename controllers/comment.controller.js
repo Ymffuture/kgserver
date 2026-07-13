@@ -25,7 +25,7 @@ export const createComment = async (req, res) => {
     blog.comments.push(comment._id);
     await blog.save();
 
-    req.io.emit("newComment", comment);
+    req.app.get("io")?.emit("newComment", comment);
 
     return res.status(201).json({ message: 'Comment added successfully', comment, success: true });
   } catch (error) {
@@ -90,7 +90,7 @@ export const editComment = async (req, res) => {
     comment.editedAt = new Date();
     await comment.save();
 
-    req.io.emit("updateComment", comment);
+    req.app.get("io")?.emit("updateComment", comment);
 
     return res.status(200).json({ success: true, message: 'Comment updated successfully', comment });
   } catch (error) {
@@ -122,7 +122,7 @@ export const likeComment = async (req, res) => {
     comment.numberOfDislikes = comment.dislikes.length;
 
     await comment.save();
-    req.io.emit("updateComment", comment);
+    req.app.get("io")?.emit("updateComment", comment);
 
     return res.status(200).json({
       success: true,
@@ -158,7 +158,7 @@ export const dislikeComment = async (req, res) => {
     comment.numberOfDislikes = comment.dislikes.length;
 
     await comment.save();
-    req.io.emit("updateComment", comment);
+    req.app.get("io")?.emit("updateComment", comment);
 
     return res.status(200).json({
       success: true,
@@ -207,7 +207,7 @@ export const reactToComment = async (req, res) => {
   try {
     const { id } = req.params;
     const { emoji } = req.body;
-    const userId = req.user._id;
+    const userId = req.id;
 
     const comment = await Comment.findById(id);
     if (!comment) return res.status(404).json({ success: false, message: "Comment not found" });
@@ -227,4 +227,3 @@ export const reactToComment = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-
