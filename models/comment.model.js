@@ -15,11 +15,19 @@ const commentSchema = new mongoose.Schema(
     },
     numberOfLikes: { type: Number, default: 0 },
     numberOfDislikes: { type: Number, default: 0 },
-    editedAt: { type: Date }
+    editedAt: { type: Date },
+    reports: [
+      {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        reason: { type: String, default: "" },
+        createdAt: { type: Date, default: Date.now }
+      }
+    ],
+    isHidden: { type: Boolean, default: false },
+    mentions: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
   },
   { timestamps: true }
 );
 
 const Comment = mongoose.model("Comment", commentSchema);
 export default Comment;
-
