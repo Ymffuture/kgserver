@@ -1,5 +1,6 @@
 import { Blog } from "../models/blog.model.js";
 import Comment from "../models/comment.model.js";
+import { User } from "../models/user.model.js";
 
 // ✅ Create Comment
 export const createComment = async (req, res) => {
@@ -9,6 +10,16 @@ export const createComment = async (req, res) => {
     const userId = req.id;
 
     if (!content) return res.status(400).json({ message: 'Text is required', success: false });
+
+    const commenter = await User.findById(userId).select("isBlockedFromCommenting blockedReason");
+    if (commenter?.isBlockedFromCommenting) {
+      return res.status(403).json({
+        message: commenter.blockedReason
+          ? `You've been blocked from commenting: ${commenter.blockedReason}`
+          : "You've been blocked from commenting.",
+        success: false,
+      });
+    }
 
     const blog = await Blog.findById(postId);
     if (!blog) return res.status(404).json({ message: "Blog not found", success: false });
