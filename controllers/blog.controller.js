@@ -231,7 +231,7 @@ export const likeBlog = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Blog not found' });
     }
 
-    const alreadyLiked = blog.likes.includes(userId);
+    const alreadyLiked = blog.likes.some(id => id.toString() === userId);
 
     if (alreadyLiked) {
       return res.status(400).json({ success: false, message: 'You already liked this blog' });
@@ -266,7 +266,7 @@ export const dislikeBlog = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Blog not found' });
     }
 
-    const alreadyDisliked = blog.dislikes.includes(userId);
+    const alreadyDisliked = blog.dislikes.some(id => id.toString() === userId);
     if (alreadyDisliked) {
       return res.status(400).json({ success: false, message: 'You already disliked this blog' });
     }
@@ -348,7 +348,7 @@ export const toggleBlogLike = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Blog not found' });
     }
 
-    const liked = blog.likes.includes(userId);
+    const liked = blog.likes.some(id => id.toString() === userId);
 
     if (liked) {
       blog.likes = blog.likes.filter(id => id.toString() !== userId);
