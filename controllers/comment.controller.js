@@ -127,7 +127,7 @@ export const likeComment = async (req, res) => {
     const comment = await Comment.findById(commentId).populate("userId", "firstName lastName");
     if (!comment) return res.status(404).json({ success: false, message: "Comment not found" });
 
-    const alreadyLiked = comment.likes.includes(userId);
+    const alreadyLiked = comment.likes.some(id => id.toString() === userId);
 
     if (alreadyLiked) {
       comment.likes = comment.likes.filter(id => id.toString() !== userId);
@@ -163,7 +163,7 @@ export const dislikeComment = async (req, res) => {
     const comment = await Comment.findById(commentId).populate("userId", "firstName lastName");
     if (!comment) return res.status(404).json({ success: false, message: "Comment not found" });
 
-    const alreadyDisliked = comment.dislikes.includes(userId);
+    const alreadyDisliked = comment.dislikes.some(id => id.toString() === userId);
 
     if (alreadyDisliked) {
       comment.dislikes = comment.dislikes.filter(id => id.toString() !== userId);
