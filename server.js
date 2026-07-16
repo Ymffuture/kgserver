@@ -4,6 +4,8 @@ import connectDB from "./database/db.js";
 import userRoute from "./routes/user.route.js";
 import blogRoute from "./routes/blog.route.js";
 import commentRoute from "./routes/comment.route.js";
+import adminRoute from "./routes/admin.route.js";
+import subscriptionRoute from "./routes/subscription.route.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
@@ -45,6 +47,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/blog", blogRoute);
 app.use("/api/v1/comment", commentRoute);
+app.use("/api/v1/admin", adminRoute);
+app.use("/api/v1/subscription", subscriptionRoute);
 
 // This is an API-only backend — the frontend (kgclient) is deployed
 // separately on Vercel. A simple root route so health checks / browser
