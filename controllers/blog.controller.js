@@ -1,5 +1,6 @@
 import { Blog } from "../models/blog.model.js";
 import Comment from "../models/comment.model.js";
+import { User } from "../models/user.model.js";
 import cloudinary from "../utils/cloudinary.js";
 import getDataUri from "../utils/dataUri.js";
 
@@ -112,6 +113,10 @@ export const getPublishedBlog = async (_,res) => {
 export const getBlogById = async (req, res) => {
     try {
         const { blogId } = req.params;
+
+        // Atomic increment first (doesn't need the full doc, avoids a race
+        // between two concurrent viewers reading stale view counts).
+        await Blog.findByIdAndUpdate(blogId, { $inc: { views: 1 } });
 
         const blog = await Blog.findById(blogId)
             .populate({ path: "author", select: "firstName lastName photoUrl" })
@@ -410,5 +415,64 @@ export const getMyTotalBlogDislikes = async (req, res) => {
       success: false,
       message: "Failed to fetch total blog dislikes",
     });
+  }
+};
+
+// ✅ Real, public, platform-wide stats — used on Home/About pages.
+// No hardcoded numbers: every value here is a live count from the database.
+export const getPlatformStats = async (_, res) => {
+  try {
+    const [totalArticles, totalUsers, totalComments, blogs] = await Promise.all([
+      Blog.countDocuments({ isPublished: true }),
+      User.countDocuments(),
+      Comment.countDocuments(),
+      Blog.find({ isPublished: true }).select("likes views"),
+    ]);
+
+    const totalLikes = blogs.reduce((sum, b) => sum + (b.likes?.length || 0), 0);
+    const totalViews = blogs.reduce((sum, b) => sum + (b.views || 0), 0);
+
+    return res.status(200).json({
+      success: true,
+      stats: {
+        totalArticles,
+        totalUsers,
+        totalComments,
+        totalLikes,
+        totalViews,
+      },
+    });
+  } catch (error) {
+    console.error("Error getting platform stats:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch platform stats" });
+  }
+};
+
+// ✅ Real per-user stats for the logged-in user's own profile page.
+export const getMyProfileStats = async (req, res) => {
+  try {
+    const userId = req.id;
+
+    const [myBlogs, totalCommentsByMe] = await Promise.all([
+      Blog.find({ author: userId }).select("likes views"),
+      Comment.countDocuments({ userId }),
+    ]);
+
+    const totalArticles = myBlogs.length;
+    const totalLikesReceived = myBlogs.reduce((sum, b) => sum + (b.likes?.length || 0), 0);
+    const totalViews = myBlogs.reduce((sum, b) => sum + (b.views || 0), 0);
+
+    return res.status(200).json({
+      success: true,
+      stats: {
+        totalArticles,
+        totalComments: totalCommentsByMe,
+        totalLikes: totalLikesReceived,
+        totalViews,
+      },
+    });
+  } catch (error) {
+    console.error("Error getting profile stats:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch profile stats" });
   }
 };
