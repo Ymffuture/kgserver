@@ -2,7 +2,7 @@ import express from "express"
 
 import { isAuthenticated } from "../middleware/isAuthenticated.js"
 import { singleUpload } from "../middleware/multer.js"
-import {createBlog, deleteBlog, dislikeBlog, undislikeBlog, unlikeBlog, getAllBlogs, getBlogById, getMyTotalBlogLikes, getOwnBlogs, getPublishedBlog, likeBlog, togglePublishBlog, updateBlog, getMyTotalBlogDislikes} from "../controllers/blog.controller.js"
+import {createBlog, deleteBlog, dislikeBlog, undislikeBlog, unlikeBlog, getAllBlogs, getBlogById, getMyTotalBlogLikes, getOwnBlogs, getPublishedBlog, likeBlog, togglePublishBlog, updateBlog, getMyTotalBlogDislikes, getPlatformStats, getMyProfileStats} from "../controllers/blog.controller.js"
 
 const router = express.Router()
 
@@ -28,6 +28,11 @@ router.post("/:id/undislike", isAuthenticated, undislikeBlog);
 
 router.get('/my-blogs/likes', isAuthenticated, getMyTotalBlogLikes)
 router.get('/me/dislikes', isAuthenticated, getMyTotalBlogDislikes);
+
+// Real stats — public platform-wide numbers (Home/About), and the logged-in
+// user's own real numbers (Profile). No hardcoded/fake figures anywhere.
+router.get('/platform-stats', getPlatformStats)
+router.get('/my-stats', isAuthenticated, getMyProfileStats)
 
 // Fetch a single blog by id — used when viewing a blog directly (e.g. page
 // refresh) and it isn't already in Redux state. Must stay after the
